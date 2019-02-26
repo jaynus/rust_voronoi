@@ -1,9 +1,9 @@
-#![deny(missing_docs,
-        missing_debug_implementations,
+#![deny(missing_debug_implementations,
         trivial_casts, trivial_numeric_casts,
         unsafe_code,
-        unstable_features,
         unused_import_braces, unused_qualifications)]
+#![allow(missing_docs, unstable_features)]
+#![feature(crate_visibility_modifier)]
 
 //! A Rust implementation of Fortune's Linesweep algorithm for computing Voronoi diagrams.
 
@@ -24,8 +24,11 @@ mod beachline;
 mod event;
 mod voronoi;
 mod lloyd;
+mod wrapper;
 
 pub use crate::voronoi::voronoi;
 pub use crate::point::Point;
-pub use crate::dcel::{DCEL, make_line_segments, make_polygons};
+pub use crate::dcel::{DCEL, Polygon, make_line_segments, make_polygons, make_polygon_with_edges};
 pub use crate::lloyd::{lloyd_relaxation, polygon_centroid};
+
+pub use crate::wrapper::{VoronoiDiagram, VoronoiCell};

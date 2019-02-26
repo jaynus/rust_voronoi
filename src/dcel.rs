@@ -2,7 +2,7 @@ use std::fmt;
 use crate::point::Point;
 use crate::geometry::{Segment, segment_intersection};
 
-const NIL: usize = !0;
+crate const NIL: usize = !0;
 
 /// Doubly Connected Edge List representation of a subdivision of the plane.
 pub struct DCEL {
@@ -153,9 +153,9 @@ pub struct HalfEdge {
     pub twin: usize, // index of halfedge
     /// The index of the next halfedge
     pub next: usize, // index of halfedge
-    face: usize, // index of face
-    prev: usize, // index of halfedge
-    alive: bool,
+    crate face: usize, // index of face
+    crate prev: usize, // index of halfedge
+    crate alive: bool,
 }
 
 impl fmt::Debug for HalfEdge {
@@ -350,6 +350,50 @@ pub fn make_polygons(dcel: &DCEL) -> Vec<Vec<Point>> {
     // remove the outer face
     result.sort_by(|a, b| a.len().cmp(&b.len()));
     result.pop();
+
+    return result;
+}
+
+/// Representation of a polygon
+#[derive(Clone, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
+pub struct Polygon {
+    /// Edges of the polygon
+    pub edges: Vec<[Point; 2]>,
+    /// Faces of the polygon
+    pub faces: Vec<Point>,
+}
+impl Polygon {
+    /// Representation of a polygon
+    pub fn new() -> Self {
+        Self {
+            edges: vec![],
+            faces: vec![],
+        }
+    }
+}
+/// TODO:
+pub fn make_polygon_with_edges(dcel: &DCEL) -> Vec<Polygon> {
+    let mut result = vec![];
+    for face in &dcel.faces {
+        if !face.alive { continue; }
+        let mut this_poly = Polygon::new();
+        let start_edge = face.outer_component;
+        let mut current_edge = start_edge;
+        loop {
+            if dcel.halfedges[dcel.halfedges[current_edge].next].origin != NIL {
+                this_poly.edges.push([dcel.vertices[dcel.halfedges[current_edge].origin].coordinates, dcel.get_origin(dcel.halfedges[current_edge].next)])
+            }
+            this_poly.faces.push(dcel.get_origin(current_edge));
+            current_edge = dcel.halfedges[current_edge].next;
+            if current_edge == start_edge { break; }
+        }
+        result.push(this_poly);
+    }
+
+    // remove the outer face
+    //result.sort_by(|a, b| a.len().cmp(&b.len()));
+    //result.pop();
 
     return result;
 }
