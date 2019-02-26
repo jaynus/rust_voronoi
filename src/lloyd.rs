@@ -1,6 +1,6 @@
-use point::Point;
-use voronoi::voronoi;
-use dcel::make_polygons;
+use crate::point::Point;
+use crate::voronoi::voronoi;
+use crate::dcel::make_polygons;
 
 /// Computes the centroid of a polygon.
 pub fn polygon_centroid(pts: &Vec<Point>) -> Point {

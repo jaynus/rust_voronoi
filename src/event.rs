@@ -4,7 +4,7 @@ use std::collections::BinaryHeap;
 
 use fnv::FnvHashSet;
 
-use point::Point;
+use crate::point::Point;
 
 #[derive(Clone)]
 pub enum Event {

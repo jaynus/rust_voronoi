@@ -1,6 +1,6 @@
 use ordered_float::OrderedFloat;
-use point::Point;
-use beachline::BreakPoint;
+use crate::point::Point;
+use crate::beachline::BreakPoint;
 
 type TripleSite = (Point, Point, Point);
 

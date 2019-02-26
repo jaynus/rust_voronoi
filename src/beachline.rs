@@ -1,6 +1,6 @@
 use std::fmt;
-use point::Point;
-use geometry::get_breakpoint_x;
+use crate::point::Point;
+use crate::geometry::get_breakpoint_x;
 
 const NIL: usize = !0;
 type TripleSite = (Point, Point, Point);

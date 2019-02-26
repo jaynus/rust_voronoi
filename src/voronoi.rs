@@ -1,8 +1,8 @@
-use point::Point;
-use dcel::{DCEL, Vertex, add_line, add_faces};
-use beachline::*;
-use event::*;
-use geometry::*;
+use crate::point::Point;
+use crate::dcel::{DCEL, Vertex, add_line, add_faces};
+use crate::beachline::*;
+use crate::event::*;
+use crate::geometry::*;
 
 type TripleSite = (Point, Point, Point);
 
@@ -322,7 +322,7 @@ fn extend_edges(beachline: &BeachLine, dcel: &mut DCEL) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dcel::make_polygons;
+    use crate::dcel::make_polygons;
 
     #[test]
     fn readme_example() {

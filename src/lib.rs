@@ -9,8 +9,6 @@
 
 #[macro_use]
 extern crate log;
-extern crate ordered_float;
-extern crate fnv;
 
 #[cfg(feature = "serde_support")]
 extern crate serde;
@@ -27,7 +25,7 @@ mod event;
 mod voronoi;
 mod lloyd;
 
-pub use voronoi::voronoi;
-pub use point::Point;
-pub use dcel::{DCEL, make_line_segments, make_polygons};
-pub use lloyd::{lloyd_relaxation, polygon_centroid};
+pub use crate::voronoi::voronoi;
+pub use crate::point::Point;
+pub use crate::dcel::{DCEL, make_line_segments, make_polygons};
+pub use crate::lloyd::{lloyd_relaxation, polygon_centroid};

@@ -1,6 +1,6 @@
 use std::fmt;
-use point::Point;
-use geometry::{Segment, segment_intersection};
+use crate::point::Point;
+use crate::geometry::{Segment, segment_intersection};
 
 const NIL: usize = !0;
 
