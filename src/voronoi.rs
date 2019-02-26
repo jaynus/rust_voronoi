@@ -327,7 +327,7 @@ mod tests {
     #[test]
     fn readme_example() {
         let vor_pts = vec![Point::new(0.0, 1.0), Point::new(2.0, 3.0), Point::new(10.0, 12.0)];
-        let vor_diagram = voronoi(vor_pts, 800.);
+        let vor_diagram = voronoi(&vor_pts, 800.);
         let vor_polys = make_polygons(&vor_diagram);
         assert_eq!(vor_polys.len(), 3);
     }
@@ -337,7 +337,7 @@ mod tests {
     fn degenerate_example_horz() {
         let vor_pts = vec![Point::new(10.0, 1.0), Point::new(20.0, 1.0), Point::new(30.0, 1.0)];
         let num_pts = vor_pts.len();
-        let vor_diagram = voronoi(vor_pts, 800.);
+        let vor_diagram = voronoi(&vor_pts, 800.);
         let vor_polys = make_polygons(&vor_diagram);
         assert_eq!(vor_polys.len(), num_pts);
     }
@@ -346,7 +346,7 @@ mod tests {
     fn degenerate_example_vert() {
         let vor_pts = vec![Point::new(1.0, 10.0), Point::new(1.0, 20.0), Point::new(1.0, 30.0), Point::new(1.0, 40.0)];
         let num_pts = vor_pts.len();
-        let vor_diagram = voronoi(vor_pts, 800.);
+        let vor_diagram = voronoi(&vor_pts, 800.);
         let vor_polys = make_polygons(&vor_diagram);
         assert_eq!(vor_polys.len(), num_pts);
     }

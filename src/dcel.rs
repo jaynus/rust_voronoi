@@ -174,8 +174,8 @@ impl HalfEdge {
 #[derive(Debug)]
 /// A face of a DCEL
 pub struct Face {
-    outer_component: usize, // index of halfedge
-    alive: bool,
+    crate outer_component: usize, // index of halfedge
+    crate alive: bool,
 }
 
 impl fmt::Display for Face {
