@@ -1,6 +1,7 @@
 use std::fmt;
 use crate::point::Point;
 use crate::geometry::{Segment, segment_intersection};
+use rayon::prelude::*;
 
 crate const NIL: usize = !0;
 
@@ -318,24 +319,22 @@ fn get_line_intersections(seg: Segment, dcel: &DCEL) -> Vec<(Point, usize)> {
 }
 
 /// Constructs the line segments of the Voronoi diagram.
-pub fn make_line_segments(dcel: &DCEL) -> Vec<Segment> {
-    let mut result = vec![];
-    for halfedge in &dcel.halfedges {
+pub fn make_line_segments(dcel: &DCEL) -> Vec<(Point, Point)> {
+    dcel.halfedges.par_iter().filter_map(|halfedge| {
         if halfedge.origin != NIL && halfedge.next != NIL && halfedge.alive {
             if dcel.halfedges[halfedge.next].origin != NIL {
-                result.push([dcel.vertices[halfedge.origin].coordinates,
-                    dcel.get_origin(halfedge.next)])
+                return Some((dcel.vertices[halfedge.origin].coordinates,
+                dcel.get_origin(halfedge.next)));
             }
         }
-    }
-    result
+        None
+    }).collect::<Vec<_>>()
 }
 
 /// Constructs the faces of the Voronoi diagram.
 pub fn make_polygons(dcel: &DCEL) -> Vec<Vec<Point>> {
-    let mut result = vec![];
-    for face in &dcel.faces {
-        if !face.alive { continue; }
+    let mut result = dcel.faces.par_iter().filter_map(|face| {
+        if !face.alive { return None; }
         let mut this_poly = vec![];
         let start_edge = face.outer_component;
         let mut current_edge = start_edge;
@@ -344,56 +343,12 @@ pub fn make_polygons(dcel: &DCEL) -> Vec<Vec<Point>> {
             current_edge = dcel.halfedges[current_edge].next;
             if current_edge == start_edge { break; }
         }
-        result.push(this_poly);
-    }
+        Some(this_poly)
+    }).collect::<Vec<_>>();
 
     // remove the outer face
     result.sort_by(|a, b| a.len().cmp(&b.len()));
     result.pop();
-
-    return result;
-}
-
-/// Representation of a polygon
-#[derive(Clone, PartialEq, Eq, Debug)]
-#[cfg_attr(feature = "serde_support", derive(Serialize, Deserialize))]
-pub struct Polygon {
-    /// Edges of the polygon
-    pub edges: Vec<[Point; 2]>,
-    /// Faces of the polygon
-    pub faces: Vec<Point>,
-}
-impl Polygon {
-    /// Representation of a polygon
-    pub fn new() -> Self {
-        Self {
-            edges: vec![],
-            faces: vec![],
-        }
-    }
-}
-/// TODO:
-pub fn make_polygon_with_edges(dcel: &DCEL) -> Vec<Polygon> {
-    let mut result = vec![];
-    for face in &dcel.faces {
-        if !face.alive { continue; }
-        let mut this_poly = Polygon::new();
-        let start_edge = face.outer_component;
-        let mut current_edge = start_edge;
-        loop {
-            if dcel.halfedges[dcel.halfedges[current_edge].next].origin != NIL {
-                this_poly.edges.push([dcel.vertices[dcel.halfedges[current_edge].origin].coordinates, dcel.get_origin(dcel.halfedges[current_edge].next)])
-            }
-            this_poly.faces.push(dcel.get_origin(current_edge));
-            current_edge = dcel.halfedges[current_edge].next;
-            if current_edge == start_edge { break; }
-        }
-        result.push(this_poly);
-    }
-
-    // remove the outer face
-    //result.sort_by(|a, b| a.len().cmp(&b.len()));
-    //result.pop();
 
     return result;
 }

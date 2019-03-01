@@ -1,5 +1,6 @@
 use crate::{DCEL, Point};
 use crate::dcel::NIL;
+use rayon::prelude::*;
 
 #[derive(Debug)]
 pub struct VoronoiDiagram {
@@ -7,7 +8,8 @@ pub struct VoronoiDiagram {
     pub dcel: DCEL,
 }
 
-impl VoronoiDiagram {
+impl VoronoiDiagram
+{
     pub fn new(dcel: DCEL) -> Self {
         Self {
             dcel,
@@ -27,26 +29,104 @@ impl VoronoiDiagram {
     pub fn cells<'a>(&'a self) -> impl Iterator<Item=VoronoiCell> + 'a {
         CellIter::new(&self.dcel)
     }
+
+    pub fn neighbors<'a>(&'a self, cell: &VoronoiCell) -> Vec<VoronoiCell> {
+        use std::sync::RwLock;
+        use rayon::iter::ParallelIterator;
+        use rayon::iter::ParallelBridge;
+        let neighbors = RwLock::new(Vec::new());
+
+        self.cells().par_bridge().for_each(|other|{
+            for self_point in cell.points() {
+                for other_point in other.points() {
+                    if self_point == other_point {
+                        neighbors.write().unwrap().push(other.clone());
+                        break;
+                    }
+                }
+            }
+        });
+
+        let r = neighbors.read().unwrap().to_vec();
+        r
+    }
 }
+
+#[derive(Debug, Clone)]
+pub struct VoronoiCell<'a> {
+    index: usize,
+    points: Vec<usize>,
+    dcel: &'a DCEL,
+}
+
+impl<'a> VoronoiCell<'a> {
+    pub fn index(&self) -> usize {
+        self.index
+    }
+
+    pub fn centroid(&self, ) -> Point {
+        crate::lloyd::polygon_centroid(&self.points())
+    }
+
+    pub fn points(&self, ) -> Vec<Point>  {
+        self.points.iter().map(|p| self.dcel.get_origin(*p)).collect::<Vec<_>>()
+    }
+
+    /// Create a line segment list for this poly
+    pub fn segments(&self, ) -> Vec<(Point, Point)> {
+        let mut ret = Vec::new();
+        if self.points.len() < 2 {
+            return ret;
+        }
+
+        let mut i = 0;
+        for i in 0..self.points.len() {
+            let cur = self.dcel.get_origin(self.points[i]);
+            let mut next;
+            if i == self.points.len() - 1 {
+                next = self.dcel.get_origin(self.points[0]);
+            } else {
+                next = self.dcel.get_origin(self.points[i + 1]);
+            }
+
+            ret.push((cur, next));
+        }
+
+        ret
+    }
+}
+impl<'a> PartialEq for VoronoiCell<'a> {
+    fn eq(&self, other: &VoronoiCell<'a>) -> bool {
+        self.index == other.index
+    }
+}
+
 
 
 pub struct CellIter<'a> {
     dcel: &'a DCEL,
     index: usize,
+    end: usize,
 }
 impl<'a> CellIter<'a> {
     pub fn new(dcel: &'a DCEL,) -> Self {
         Self {
             dcel,
             index: 0,
+            end: 9999999,
         }
+    }
+    pub fn range(mut self, begin: usize, end: usize) -> Self {
+        self.index = begin;
+        self.end = end;
+        self
     }
 }
 impl<'a> Iterator for CellIter<'a> {
-    type Item = VoronoiCell;
+    type Item = VoronoiCell<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.index >= self.dcel.faces.len() {
+        if self.index >= self.dcel.faces.len() || self.index >= self.end {
             return None;
         }
 
@@ -54,7 +134,7 @@ impl<'a> Iterator for CellIter<'a> {
 
         while !face.alive {
             self.index += 1;
-            if self.index >= self.dcel.faces.len() {
+            if self.index >= self.dcel.faces.len() || self.index >= self.end {
                 return None;
             }
             face = &self.dcel.faces[self.index];
@@ -62,38 +142,20 @@ impl<'a> Iterator for CellIter<'a> {
         let mut current_edge = face.outer_component;
         let mut start_edge = current_edge;
 
-        let mut current_edge = start_edge;
         let mut this_poly = Vec::new();
-        while current_edge != start_edge {
-            this_poly.push(self.dcel.get_origin(current_edge));
+        loop {
+            this_poly.push(current_edge);
             current_edge = self.dcel.halfedges[current_edge].next;
+            if current_edge == start_edge { break; }
         }
 
         self.index += 1;
 
         Some(VoronoiCell {
-            index: self.index,
+            index: self.index-1,
             points: this_poly,
+            dcel: self.dcel,
         })
-    }
-}
-
-#[derive(Debug)]
-pub struct VoronoiCell {
-    index: usize,
-    points: Vec<Point>,
-}
-impl VoronoiCell {
-    pub fn index(&self) -> usize {
-        self.index
-    }
-
-    pub fn centroid(&self) -> Point {
-        crate::lloyd::polygon_centroid(&self.points)
-    }
-
-    pub fn points<'a>(&'a self) -> impl Iterator<Item=Point> + 'a {
-        self.points.iter().map(|p| *p)
     }
 }
 

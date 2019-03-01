@@ -28,7 +28,7 @@ mod wrapper;
 
 pub use crate::voronoi::voronoi;
 pub use crate::point::Point;
-pub use crate::dcel::{DCEL, Polygon, make_line_segments, make_polygons, make_polygon_with_edges};
+pub use crate::dcel::{DCEL, make_line_segments, make_polygons};
 pub use crate::lloyd::{lloyd_relaxation, polygon_centroid};
 
 pub use crate::wrapper::{VoronoiDiagram, VoronoiCell};
