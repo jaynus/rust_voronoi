@@ -203,7 +203,7 @@ pub fn add_faces(dcel: &mut DCEL) {
     let mut seen_edges = vec![false; num_halfedges];
 
     let mut processed_edges = 0;
-    info!("Adding faces. There are {} halfedges.", num_halfedges);
+    debug!("Adding faces. There are {} halfedges.", num_halfedges);
 
     for edge_index in 0..num_halfedges {
         if seen_edges[edge_index] || !dcel.halfedges[edge_index].alive { continue; }
@@ -221,7 +221,7 @@ pub fn add_faces(dcel: &mut DCEL) {
             if current_edge == edge_index { break; }
         }
     }
-    info!("Generated faces for {} edges.", processed_edges);
+    debug!("Generated faces for {} edges.", processed_edges);
 }
 
 // does not handle the case where line goes through dcel vertex

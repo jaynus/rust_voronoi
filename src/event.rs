@@ -86,7 +86,7 @@ impl EventQueue {
         }
 
         let new_node_ind = self.events.len();
-        info!("pushing event {}", new_node_ind);
+        debug!("pushing event {}", new_node_ind);
         self.events.push(event);
 
         event_id

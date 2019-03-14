@@ -22,17 +22,19 @@ impl VoronoiDiagram {
     pub fn cells(&self) -> Vec<VoronoiCell> {
         let polygons = make_polygons(&self.dcel);
 
-        polygons.iter().map(|points| {
+        let mut ret = polygons.iter().map(|points| {
             VoronoiCell {
                 points: points.clone(),
                 centroid: polygon_centroid(points),
             }
         })
-            .collect::<Vec<_>>()
+        .collect::<Vec<_>>();
+        ret.sort();
+        ret
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub struct VoronoiCell {
     pub points: Vec<Point>,
     pub centroid: Point,
