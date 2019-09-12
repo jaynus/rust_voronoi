@@ -154,9 +154,9 @@ pub struct HalfEdge {
     pub twin: usize, // index of halfedge
     /// The index of the next halfedge
     pub next: usize, // index of halfedge
-    crate face: usize, // index of face
-    crate prev: usize, // index of halfedge
-    crate alive: bool,
+    pub face: usize, // index of face
+    pub prev: usize, // index of halfedge
+    pub alive: bool,
 }
 
 impl fmt::Debug for HalfEdge {
@@ -175,8 +175,8 @@ impl HalfEdge {
 #[derive(Debug)]
 /// A face of a DCEL
 pub struct Face {
-    crate outer_component: usize, // index of halfedge
-    crate alive: bool,
+    pub outer_component: usize, // index of halfedge
+    pub alive: bool,
 }
 
 impl fmt::Display for Face {
